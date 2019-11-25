@@ -2,6 +2,7 @@ import numpy
 import random
 import math
 from more_itertools import locate
+import matplotlib.pyplot as plt
 
 
 # ------------------FUNCTIONS----------------------------------
@@ -176,6 +177,8 @@ elitism = bool(input('Elitism? (Y or N) '))
 sum_w_list = []
 sum_v_list = []
 sum_fitness_list = []
+output_value_for_graph = []
+
 
 print('\n----------------------------------------------------------')
 print('Initializing population')
@@ -204,9 +207,14 @@ for gen in range(num_of_generation):
     print("chromosome: ", population[max_idx])
     print("weight: ", sum_w_list[max_idx])
     print("value: ", sum_v_list[max_idx])
+    output_value_for_graph.append(sum_v_list[max_idx])
     print("\n")
 max_idx = maximum(sum_fitness_list)[1]
 f_out.write("chromosome: " + str(population[max_idx]) + "\n")
 f_out.write("weight: " + str(sum_w_list[max_idx]) + "\n")
 f_out.write("value: " + str(sum_v_list[max_idx]))
 f_out.close()
+
+plt.plot(range(1, num_of_generation+1), output_value_for_graph)
+plt.show()
+
