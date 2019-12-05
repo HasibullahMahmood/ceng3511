@@ -4,7 +4,6 @@ import math
 from more_itertools import locate
 import matplotlib.pyplot as plt
 
-
 # ------------------FUNCTIONS----------------------------------
 def read_file(file_name):
     file = open(file_name, "r")
@@ -54,7 +53,7 @@ def minimum(lists):
 
 
 # pop = population, n = number of parents
-def roulette_wheel_selection(n=2):
+def roulette_wheel_selection(n):
     index_of_selected_parent = []
     for i in range(n):
         rand = random.randrange(0, sum(sum_fitness_list))
@@ -69,7 +68,7 @@ def roulette_wheel_selection(n=2):
 
 
 # pop = population, n = number of parents, k = number of random selected
-def tournament_selection(n=2):
+def tournament_selection(n):
     index_of_selected_parent = []
     for i in range(n):
         rand_list = random.sample(range(len(population)), k_tor_sel)
@@ -147,7 +146,7 @@ def fitness_based_selection():
 values = read_file("v.txt")
 allowed_weight = read_file("c.txt")[0]
 weights = read_file("w.txt")
-f_out = open('./out.txt', 'w')
+fout = open('./out.txt', 'w')
 print('Capacity :', allowed_weight)
 print('Weight :', weights)
 print('Value : ', values)
@@ -177,9 +176,8 @@ elitism = bool(input('Elitism? (Y or N) '))
 sum_w_list = []
 sum_v_list = []
 sum_fitness_list = []
+new_children = []
 output_value_for_graph = []
-
-
 print('\n----------------------------------------------------------')
 print('Initializing population')
 # Creating the initial population.
@@ -187,18 +185,23 @@ num_of_gen_per_ch = len(values)
 pop_size = (sol_per_pop, num_of_gen_per_ch)
 population = numpy.random.randint(2, size=pop_size)
 ages = [0] * sol_per_pop
+new_gen_size = math.ceil(sol_per_pop / 2)
 
 for gen in range(num_of_generation):
     print("Generation ", gen + 1)
     fitness_calculator()
-    idx_of_sel_par = []
     if parentSelection == 1:
-        idx_of_sel_par = roulette_wheel_selection()
+        idx_of_sel_par = roulette_wheel_selection(new_gen_size)
     elif parentSelection == 2:
-        idx_of_sel_par = tournament_selection()
-    new_children = cross_over([population[idx_of_sel_par[0]], population[idx_of_sel_par[1]]], n_point_crossover)
-    random_ch_idx = numpy.random.randint(2)
-    new_children[random_ch_idx] = bit_flip_mutate(new_children[random_ch_idx], mutProb)
+        idx_of_sel_par = tournament_selection(new_gen_size)
+    for x in range(new_gen_size):
+        if x + 1 < new_gen_size:
+            new_children.extend(
+                cross_over([population[idx_of_sel_par[x]], population[idx_of_sel_par[x + 1]]], n_point_crossover))
+            random_ch_idx = numpy.random.randint(2)
+            new_children[random_ch_idx] = bit_flip_mutate(new_children[random_ch_idx], mutProb)
+        else:
+            break
     if survivalSelection == 1:
         age_based_selection()
     elif survivalSelection == 2:
@@ -209,12 +212,12 @@ for gen in range(num_of_generation):
     print("value: ", sum_v_list[max_idx])
     output_value_for_graph.append(sum_v_list[max_idx])
     print("\n")
-max_idx = maximum(sum_fitness_list)[1]
-f_out.write("chromosome: " + str(population[max_idx]) + "\n")
-f_out.write("weight: " + str(sum_w_list[max_idx]) + "\n")
-f_out.write("value: " + str(sum_v_list[max_idx]))
-f_out.close()
+
+fout.write("chromosome: " + str(population[max_idx]) + "\n")
+fout.write("weight: " + str(sum_w_list[max_idx]) + "\n")
+fout.write("value: " + str(sum_v_list[max_idx]))
+fout.close()
 
 plt.plot(range(1, num_of_generation+1), output_value_for_graph)
 plt.show()
-
+# updated
